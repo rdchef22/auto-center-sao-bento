@@ -13,9 +13,19 @@ main{min-width:0}.topbar{height:76px;background:#fff;border-bottom:1px solid var
 @media(max-width:1000px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}.app{grid-template-columns:210px 1fr}.content{padding:20px}}
 @media(max-width:720px){.app{display:block}.sidebar{position:fixed;z-index:4;left:-260px;top:0;bottom:0;width:245px;transition:left .2s;box-shadow:10px 0 35px #0002}.sidebar.open{left:0}.mobile-menu{display:inline-flex}.topbar{height:68px;padding:0 15px}.topbar h2{font-size:16px}.topbar p{display:none}.top-actions .btn:not(.primary){display:none}.content{padding:16px}.cards{gap:9px}.stat{padding:14px}.stat .value{font-size:21px}.stat .label{font-size:11px}.page-head{align-items:flex-start}.page-head h3{font-size:19px}.page-head .btn{font-size:12px;padding:9px}.quick{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:14px}.stat-icon{width:29px;height:29px}.table-wrap{margin:0 -5px}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div class="app">
+<div id="authScreen" style="min-height:100vh;display:none;place-items:center;padding:20px;background:#f3f5f9">
+ <form id="loginForm" style="width:min(420px,100%);background:#fff;border:1px solid #e4e8ef;border-radius:18px;padding:26px;box-shadow:0 12px 40px #11182712">
+  <div style="font-size:34px">🔧</div><h2 style="margin:8px 0">Auto Center São Bento</h2><p style="color:#697386;font-size:13px;margin-bottom:20px">Entre para acessar seu painel e sincronizar seus dados.</p>
+  <label style="display:block;font-size:12px;font-weight:700;margin:12px 0 6px">E-mail</label><input id="loginEmail" type="email" required autocomplete="username" style="width:100%;padding:12px;border:1px solid #d7dde7;border-radius:9px">
+  <label style="display:block;font-size:12px;font-weight:700;margin:12px 0 6px">Senha</label><input id="loginPassword" type="password" required autocomplete="current-password" style="width:100%;padding:12px;border:1px solid #d7dde7;border-radius:9px">
+  <button type="submit" style="width:100%;margin-top:18px;padding:12px;border:0;border-radius:9px;background:#f97316;color:#fff;font-weight:700">Entrar</button>
+  <p id="authMessage" style="font-size:12px;color:#b91c1c;line-height:1.5"></p>
+ </form>
+</div>
+<div class="app" id="mainApp" style="display:none">
 <aside class="sidebar" id="sidebar">
   <div class="brand"><div class="logo">🔧</div><div><h1>AUTO CENTER<br>SÃO BENTO</h1><small>Sistema de gestão</small></div></div>
   <nav class="nav" id="nav">
@@ -32,7 +42,7 @@ main{min-width:0}.topbar{height:76px;background:#fff;border-bottom:1px solid var
   <div class="sidebar-note">Versão inicial • Dados salvos neste navegador.<br>Próxima etapa: banco online seguro.</div>
 </aside>
 <main>
-<header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="btn mobile-menu" id="menuBtn">☰</button><div><h2 id="topTitle">Visão geral</h2><p id="todayLabel"></p></div></div><div class="top-actions"><button class="btn" id="exportBtn">Exportar dados</button><button class="btn primary" id="quickSale">＋ Nova venda</button></div></header>
+<header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="btn mobile-menu" id="menuBtn">☰</button><div><h2 id="topTitle">Visão geral</h2><p id="todayLabel"></p></div></div><div class="top-actions"><button class="btn" id="exportBtn">Exportar dados</button><button class="btn" id="logoutBtn">Sair</button><button class="btn primary" id="quickSale">＋ Nova venda</button></div></header>
 <div class="content" id="content"></div>
 </main>
 </div>
@@ -42,7 +52,7 @@ const KEY='acsb_v1_data';
 const blank={products:[],clients:[],services:[],sales:[],appointments:[],orders:[],transactions:[]};
 let db=loadDB(),page='dashboard',editing=null,searchTerm='';
 function loadDB(){try{return {...blank,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return structuredClone(blank)}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render();syncCloud()}
 const $=s=>document.querySelector(s);
 const money=n=>(Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const today=()=>new Date().toISOString().slice(0,10);
@@ -122,10 +132,50 @@ if(type==='orders'&&obj.status==='Entregue'){}save();closeForm();
 };
 window.editItem=(type,id)=>openForm(type,id);
 window.deleteItem=(type,id)=>{if(!confirm('Tem certeza que deseja excluir este registro?'))return;db[type]=db[type].filter(x=>x.id!==id);save()};
-window.updateStatus=(type,id,status)=>{let x=db[type].find(x=>x.id===id);if(x){x.status=status;localStorage.setItem(KEY,JSON.stringify(db));}};
+window.updateStatus=(type,id,status)=>{let x=db[type].find(x=>x.id===id);if(x){x.status=status;localStorage.setItem(KEY,JSON.stringify(db));syncCloud();}};
 window.whatsapp=(phone,msg)=>{let n=String(phone).replace(/\D/g,'');if(n.length===10||n.length===11)n='55'+n;window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank','noopener')};
 window.exportData=()=>$('#exportBtn').click();
-render();
+
+// Conexão segura: use somente a chave Publishable no navegador. Nunca coloque sb_secret/service_role aqui.
+const SUPABASE_URL='https://iueiooqpdcnelrbsggss.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_KEIUQoiiAxXzBn_6pcefjw_SjjX6Kae';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let cloudUser=null, syncTimer=null;
+function showLogin(message=''){ $('#mainApp').style.display='none'; $('#authScreen').style.display='grid'; $('#authMessage').textContent=message; }
+async function bootCloud(){
+ try{
+  const {data,error}=await supabaseClient.auth.getSession(); if(error) throw error;
+  if(!data.session){showLogin();return;}
+  await activateSession(data.session.user);
+ }catch(e){showLogin('Não foi possível conectar ao Supabase: '+(e.message||'verifique a conexão.'));}
+}
+async function activateSession(user){
+ cloudUser=user; $('#authScreen').style.display='none'; $('#mainApp').style.display='';
+ try{
+  const {data,error}=await supabaseClient.from('auto_center_data').select('data').eq('user_id',user.id).maybeSingle();
+  if(error) throw error;
+  if(data && data.data){ db={...blank,...data.data}; localStorage.setItem(KEY,JSON.stringify(db)); }
+  else { const local=loadDB(); db={...blank,...local}; const {error:upErr}=await supabaseClient.from('auto_center_data').upsert({user_id:user.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'}); if(upErr) throw upErr; }
+  render();
+ }catch(e){ $('#mainApp').style.display='none'; showLogin('Erro ao carregar/sincronizar os dados: '+(e.message||'verifique a tabela e as políticas RLS.')); }
+}
+async function syncCloud(){
+ if(!cloudUser) return;
+ clearTimeout(syncTimer);
+ syncTimer=setTimeout(async()=>{
+  const {error}=await supabaseClient.from('auto_center_data').upsert({user_id:cloudUser.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error) alert('Os dados foram guardados neste aparelho, mas a sincronização online falhou: '+error.message);
+ },500);
+}
+$('#loginForm').addEventListener('submit',async e=>{
+ e.preventDefault(); const btn=e.currentTarget.querySelector('button[type="submit"]'); btn.disabled=true; btn.textContent='Entrando...'; $('#authMessage').textContent='';
+ try{ const {data,error}=await supabaseClient.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value}); if(error) throw error; await activateSession(data.user); }
+ catch(err){ $('#authMessage').textContent='Não foi possível entrar: '+(err.message||'confira e-mail e senha.'); }
+ finally{btn.disabled=false;btn.textContent='Entrar';}
+});
+$('#logoutBtn').addEventListener('click',async()=>{await supabaseClient.auth.signOut();cloudUser=null;showLogin('Você saiu do sistema.');});
+supabaseClient.auth.onAuthStateChange((_event,session)=>{if(!session){cloudUser=null;showLogin();}});
+bootCloud();
 </script>
 </body>
 </html>
