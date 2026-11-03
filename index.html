@@ -44,10 +44,7 @@ function total(arr,key){return arr.reduce((s,x)=>s+(Number(x[key])||0),0)}
 function pageHead(title,sub,button,action){return `<div class="panel-head"><div><h3>${title}</h3><div class="muted" style="font-size:12px;margin-top:5px">${sub}</div></div>${button?`<button class="btn primary" onclick="${action}">＋ ${button}</button>`:''}</div>`}
 function stat(label,value,icon,foot=''){return `<div class="stat"><span class="stat-icon">${icon}</span><div class="label">${label}</div><strong>${value}</strong><small>${foot}</small></div>`}
 function filtered(arr,keys){return arr.filter(x=>!searchText||keys.some(k=>String(x[k]??'').toLowerCase().includes(searchText.toLowerCase())))}
-
-function toolbar(placeholder='Buscar...'){
-return `<div class="toolbar"><input class="search" placeholder="${placeholder}" value="${esc(searchText)}" oninput="searchText=this.value;let p=this.selectionStart;renderContentOnly();let n=document.querySelector('.search');if(n){n.focus();n.setSelectionRange(p,p)}"></div>`
-}
+function toolbar(placeholder='Buscar...'){return `<div class="toolbar"><input class="search" placeholder="${placeholder}" value="${esc(searchText)}" oninput="searchText=this.value;renderContentOnly()"></div>`}
 function table(headers,rows){return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td colspan="${headers.length}" class="empty">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`}
 function acts(type,x){return `<div class="actions"><button class="btn small" onclick="openModal('${type}','${x.id}')">Editar</button><button class="btn small danger" onclick="del('${type}','${x.id}')">Excluir</button></div>`}
 function render(){renderNav();let names=Object.fromEntries(navItems.map(x=>[x[0],x[2]]));$('#pageTitle').textContent=names[current];$('#pageSubtitle').textContent='Controle sua oficina em um só lugar';renderContentOnly()}
@@ -72,11 +69,8 @@ obj.id=editId||id();if(editId){let i=db[type].findIndex(x=>x.id===editId);if(i>=
 async function del(type,rid){if(!confirm('Excluir este registro?'))return;db[type]=db[type].filter(x=>x.id!==rid);await save();render()}
 async function save(){localStorage.setItem(KEY,JSON.stringify(db));renderNav();await sync()}
 let timer;async function sync(){if(!user)return;clearTimeout(timer);timer=setTimeout(async()=>{let {error}=await sb.from('auto_center_data').upsert({user_id:user.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)alert('Falha ao sincronizar: '+error.message)},350)}
-async function logout(){
-  await sb.auth.signOut();
-}
-
-function seedServices(){if(db.services.length)return;Object.entries(categories).forEach(([category,items])=>items.forEach(([name,price])=>db.services.push({id:id(),name,category,price,duration:''})));localStorage.setItem(KEY,JSON.stringify(db)) }
+async function logout(){await sb.auth.signOut()}
+function seedServices(){if(db.services.length)return;Object.entries(categories).forEach(([category,items])=>items.forEach(([name,price])=>db.services.push({id:id(),name,category,price,duration:''})));localStorage.setItem(KEY,JSON.stringify(db))}
 function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-auto-center-sao-bento.json';a.click();URL.revokeObjectURL(a.href)}
 async function activate(u){user=u;$('#loginScreen').classList.add('hidden');$('#app').classList.remove('hidden');try{let {data,error}=await sb.from('auto_center_data').select('data').eq('user_id',u.id).maybeSingle();if(error)throw error;if(data?.data)db={...structuredClone(blank),...data.data};else{let old=localStorage.getItem(KEY);if(old)try{db={...structuredClone(blank),...JSON.parse(old)}}catch{}await sb.from('auto_center_data').upsert({user_id:u.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'})}seedServices();localStorage.setItem(KEY,JSON.stringify(db));await sb.from('auto_center_data').upsert({user_id:user.id,data:db,updated_at:new Date().toISOString()},{onConflict:'user_id'});render()}catch(e){$('#loginMsg').textContent='Erro ao carregar dados: '+e.message;$('#app').classList.add('hidden');$('#loginScreen').classList.remove('hidden')}}
 $('#loginForm').onsubmit=async e=>{e.preventDefault();$('#loginMsg').textContent='Conectando...';let {data,error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});if(error)$('#loginMsg').textContent='Não foi possível entrar: '+error.message;else await activate(data.user)};
