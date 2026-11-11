@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090d14">
 <title>Auto Center São Bento | Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -32,6 +34,7 @@ radial-gradient(ellipse at 85% 0%,#ff812e0b,transparent 35%),
 var(--bg);
 color:var(--text);
 font:14px Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+-webkit-font-smoothing:antialiased;
 }
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
@@ -83,7 +86,7 @@ background:#101a27;
 box-shadow:0 0 0 3px #ff812e20;
 }
 .field textarea{resize:vertical;min-height:85px}
-.field select option{background:#121b28;color:white}
+.field select option,.search option{background:#121b28;color:white}
 
 /* BOTÕES */
 .btn{
@@ -112,22 +115,23 @@ box-shadow:0 6px 20px #ff812e30;
 position:fixed;inset:0 auto 0 0;width:265px;
 background:linear-gradient(180deg,#111b29,#0b111a);
 border-right:1px solid #26364a;
-padding:25px 16px;
+padding:22px 14px;
 display:flex;flex-direction:column;z-index:5;
+overflow-y:auto;
 }
-.brand{display:flex;align-items:center;gap:12px;padding:0 8px 32px}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px 20px}
 .brand .brand-mark{width:46px;height:46px;border-radius:15px}
 .brand b{display:block;font-size:13px;letter-spacing:1px;line-height:1.5}
 .brand small{color:var(--orange2);font-size:9px;letter-spacing:1.8px;font-weight:900}
 .nav-label{
 font-size:9px;color:#6f8198;font-weight:900;
-letter-spacing:1.8px;padding:12px 10px;
+letter-spacing:1.8px;padding:14px 10px 6px;text-transform:uppercase;
 }
 .nav button{
-display:flex;align-items:center;gap:13px;width:100%;
+display:flex;align-items:center;gap:12px;width:100%;
 border:1px solid transparent;background:transparent;
-color:#9eacbf;text-align:left;padding:12px 13px;
-border-radius:13px;margin:3px 0;font-weight:650;
+color:#9eacbf;text-align:left;padding:10px 12px;
+border-radius:12px;margin:2px 0;font-weight:650;
 transition:.2s;
 }
 .nav button.active{
@@ -136,18 +140,20 @@ border-color:#ff812e45;color:#ffb47f;
 box-shadow:inset 3px 0 #ff812e;
 }
 .nav button:hover{background:#202d3d;color:white}
-.nav .ico{width:22px;text-align:center;font-size:17px}
+.nav .ico{width:22px;text-align:center;font-size:16px}
 .side-bottom{
 margin-top:auto;border-top:1px solid var(--line);
-padding:18px 8px 0;color:#77879b;font-size:11px;line-height:1.8;
+padding:14px 8px 0;color:#77879b;font-size:11px;line-height:1.8;
 }
+.side-bottom .dot{color:var(--green)}
+.user-mail{color:#a8b6c8;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .main{
 margin-left:265px;padding:32px;
 max-width:1750px;min-height:100vh;
 }
 .topbar{
 display:flex;align-items:center;justify-content:space-between;
-gap:15px;margin-bottom:28px;padding-bottom:23px;
+gap:15px;margin-bottom:24px;padding-bottom:23px;
 border-bottom:1px solid #263447;
 }
 .eyebrow{
@@ -160,24 +166,32 @@ letter-spacing:2.3px;text-transform:uppercase;
 /* INDICADORES */
 .cards{
 display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
-gap:15px;margin:18px 0;
+gap:15px;margin:15px 0;
 }
 .stat{
 background:linear-gradient(145deg,#1a293a,#121b28);
 border:1px solid #2c4056;border-radius:20px;
 padding:21px;position:relative;overflow:hidden;
 transition:.25s;
+--tone:var(--orange);--tone2:var(--orange2);
+}
+.stat:before{
+content:"";position:absolute;left:0;right:0;top:0;height:3px;
+background:linear-gradient(90deg,var(--tone),transparent 80%);opacity:.85;
 }
 .stat:after{
 content:"";position:absolute;width:110px;height:110px;
 right:-45px;bottom:-55px;border-radius:50%;
-background:#ff812e0b;
+background:var(--tone);opacity:.07;
 }
 .stat:hover{
 transform:translateY(-4px);
-border-color:#9b623d;
+border-color:var(--tone);
 box-shadow:0 12px 30px #0003;
 }
+.stat.green{--tone:var(--green);--tone2:#7ff0c9}
+.stat.red{--tone:var(--red);--tone2:#ffa3a3}
+.stat.blue{--tone:var(--blue);--tone2:#a9ccff}
 .stat .label{color:#a8b6c8;font-size:12px;font-weight:650}
 .stat strong{
 display:block;font-size:25px;margin:14px 0 6px;
@@ -185,8 +199,9 @@ letter-spacing:-.9px;overflow-wrap:anywhere;
 }
 .stat small{color:#7f91a7;font-size:11px}
 .stat-icon{
-float:right;background:#ff812e1c;color:var(--orange2);
-padding:11px;border-radius:13px;font-size:18px;
+float:right;background:color-mix(in srgb,var(--tone) 14%,transparent);
+color:var(--tone2);
+padding:10px;border-radius:13px;font-size:18px;line-height:1;
 }
 
 /* PAINÉIS */
@@ -201,8 +216,60 @@ display:flex;justify-content:space-between;
 align-items:center;gap:12px;margin-bottom:18px;
 }
 .panel h3{margin:0;font-size:15px;letter-spacing:.1px}
-.toolbar{display:flex;gap:10px;align-items:center;margin:17px 0}
+.toolbar{display:flex;gap:10px;align-items:center;margin:17px 0 12px}
 .search{max-width:450px}
+.grid2,.grid3{display:grid;gap:15px;margin-top:18px}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid2 .panel,.grid3 .panel{margin-top:0}
+.list-row{
+display:flex;justify-content:space-between;align-items:center;gap:10px;
+padding:11px 0;font-size:12px;line-height:1.5;
+}
+.list-row+.list-row{border-top:1px solid #2b3b4f}
+.list-empty{padding:16px 0;color:var(--muted);font-size:12px}
+
+/* FILTROS */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
+.chip{
+background:#162231;border:1px solid #2c3d52;color:#aebbd0;
+padding:8px 14px;border-radius:30px;font-weight:700;font-size:12px;
+transition:.2s;
+}
+.chip span{opacity:.65;margin-left:6px;font-size:11px}
+.chip:hover{border-color:#61748d;color:#fff}
+.chip.active{
+background:linear-gradient(135deg,#ffad70,#ff791f);
+color:#1c120c;border-color:transparent;
+}
+
+/* GRÁFICOS */
+.bar-row{
+display:grid;grid-template-columns:130px 1fr 105px;gap:12px;
+align-items:center;margin:12px 0;font-size:12px;
+}
+.bar-row .name{color:#c4cfde;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .val{text-align:right;font-weight:800}
+.bar-track{
+height:11px;background:#0b121c;border-radius:20px;
+overflow:hidden;border:1px solid #243346;
+}
+.bar-fill{
+height:100%;border-radius:20px;
+background:linear-gradient(90deg,#ff812e,#ffad70);
+}
+.bar-fill.green{background:linear-gradient(90deg,#1fb582,#35d6a0)}
+.bar-fill.red{background:linear-gradient(90deg,#e05252,#ff7070)}
+.bar-fill.blue{background:linear-gradient(90deg,#4a88e8,#70aaff)}
+.vchart{display:flex;align-items:flex-end;justify-content:space-around;gap:10px;padding-top:10px}
+.vcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+.vpair{display:flex;align-items:flex-end;gap:5px;height:160px}
+.vbar{width:22px;border-radius:7px 7px 0 0;min-height:3px}
+.vbar.g{background:linear-gradient(180deg,#35d6a0,#1fb582)}
+.vbar.r{background:linear-gradient(180deg,#ff7070,#e05252)}
+.vlabel{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.5px}
+.legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 
 /* TABELAS */
 .table-wrap{
@@ -224,10 +291,14 @@ tbody tr:hover{background:#26364a55}
 .pill{
 display:inline-block;padding:6px 10px;border-radius:30px;
 background:#303e50;color:#e1e8f1;font-size:10px;font-weight:850;
+white-space:nowrap;
 }
 .pill.green{background:#153d32;color:#69e3b5}
 .pill.orange{background:#49301e;color:#ffb77d}
 .pill.red{background:#48252c;color:#ff9999}
+.pill.blue{background:#1c3556;color:#8fbcff}
+.in{color:var(--green);font-weight:800}
+.out{color:var(--red);font-weight:800}
 .actions{display:flex;gap:5px;white-space:nowrap}
 .empty{padding:35px;text-align:center;color:var(--muted)}
 
@@ -283,6 +354,7 @@ color:#ffbd8d;font-weight:900;margin:10px 0;
 @media(max-width:1150px){
 .cards{grid-template-columns:repeat(2,1fr)}
 .category-grid{grid-template-columns:repeat(2,1fr)}
+.grid2,.grid3{grid-template-columns:1fr}
 .main{padding:24px}
 .sidebar{width:235px}
 .main{margin-left:235px}
@@ -292,6 +364,7 @@ color:#ffbd8d;font-weight:900;margin:10px 0;
 width:auto;inset:auto 0 0 0;height:75px;padding:7px 5px;
 background:#101a28f2;backdrop-filter:blur(20px);
 border-right:0;border-top:1px solid #35475c;
+overflow:hidden;
 }
 .brand,.nav-label,.side-bottom{display:none}
 .nav{display:flex;overflow-x:auto;gap:3px;scrollbar-width:none}
@@ -323,6 +396,8 @@ gap:3px;padding:6px 4px;font-size:9px;margin:0;
 .modal{padding:17px;border-radius:18px}
 .modal-actions .btn{flex:1}
 .search{max-width:100%}
+.bar-row{grid-template-columns:92px 1fr 82px;gap:8px}
+.vbar{width:14px}
 }
 @media(max-width:380px){
 .topbar h1{font-size:20px}
@@ -360,9 +435,11 @@ gap:3px;padding:6px 4px;font-size:9px;margin:0;
 <div class="brand-mark">🔧</div>
 <div><b>AUTO CENTER<br>SÃO BENTO</b><small>PAINEL DE GESTÃO</small></div>
 </div>
-<div class="nav-label">MENU PRINCIPAL</div>
 <nav id="nav" class="nav"></nav>
-<div class="side-bottom">Sistema de gestão da oficina<br>Seus dados sincronizados na nuvem.</div>
+<div class="side-bottom">
+<div id="userMail" class="user-mail"></div>
+<span class="dot">●</span> Dados sincronizados na nuvem
+</div>
 </aside>
 
 <main class="main">
@@ -405,10 +482,12 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const KEY='acsb_v1_data';
 const blank={products:[],clients:[],services:[],sales:[],appointments:[],orders:[],transactions:[]};
 let db=structuredClone(blank),user=null,current='dashboard',editing=null,searchText='',timer=null;
+let chip='all',reportPeriod='all';
 const $=s=>document.querySelector(s);
 const money=n=>(Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const today=()=>new Date().toISOString().slice(0,10),id=()=>crypto.randomUUID();
+// data local (evita virar "amanhã" depois das 21h no Brasil)
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10),id=()=>crypto.randomUUID();
 
 const categories={
 'Direção e terminais':[['Terminal',50],['Pivô sem rebite',50],['Pivô com rebite',100],['Axial',70]],
@@ -419,31 +498,47 @@ const categories={
 'Alinhamento e geometria':[['Regulagem de eixo traseiro',60],['Alinhamento',60],['Balanceamento',30],['Cambagem',60],['Caster',90]]
 };
 
-const navItems=[
-['dashboard','▦','Visão geral'],
-['products','▣','Estoque'],
-['sales','↗','Vendas'],
-['clients','♙','Clientes'],
-['services','🔧','Serviços e preços'],
-['orders','▤','Ordens de serviço'],
-['appointments','▦','Agendamentos'],
-['transactions','＄','Financeiro'],
-['reports','▥','Relatórios']
+// categorias sugeridas para os produtos do estoque
+const productCategories=['Peças de suspensão','Peças de freio','Direção e terminais','Rolamentos','Óleos e fluidos','Filtros','Elétrica e baterias','Pneus e rodas','Acessórios','Ferramentas','Outros'];
+// sugestões para o financeiro
+const financeCategories=['Venda de peças','Serviço / mão de obra','Fornecedores','Aluguel','Água, luz e internet','Salários','Impostos','Ferramentas e equipamentos','Marketing','Outros'];
+
+// menu organizado por grupos
+const navGroups=[
+['Geral',[['dashboard','📊','Visão geral']]],
+['Atendimento',[['orders','📋','Ordens de serviço'],['appointments','📅','Agendamentos'],['clients','👥','Clientes']]],
+['Comercial',[['sales','🛒','Vendas'],['products','📦','Estoque'],['services','🔧','Serviços e preços']]],
+['Financeiro',[['transactions','💰','Financeiro'],['reports','📈','Relatórios']]]
 ];
+const navItems=navGroups.flatMap(g=>g[1]);
+const subtitles={
+dashboard:'Controle sua oficina em um só lugar',
+orders:'Acompanhe serviços, veículos, peças e mão de obra',
+appointments:'Organize os próximos atendimentos',
+clients:'Cadastro e contato dos clientes',
+sales:'Vendas de balcão com baixa automática no estoque',
+products:'Produtos, categorias e alerta de estoque mínimo',
+services:'Catálogo de serviços e preços',
+transactions:'Entradas e saídas do caixa por forma de pagamento',
+reports:'Indicadores e gráficos da sua oficina'
+};
 
 function renderNav(){
-$('#nav').innerHTML=navItems.map(([k,ic,n])=>
+$('#nav').innerHTML=navGroups.map(([g,items])=>
+`<div class="nav-label">${g}</div>`+items.map(([k,ic,n])=>
 `<button class="${current===k?'active':''}" onclick="go('${k}')"><span class="ico">${ic}</span>${n}</button>`
-).join('');
+).join('')).join('');
 }
-function go(p){current=p;searchText='';render()}
+function go(p){current=p;searchText='';chip='all';render();window.scrollTo(0,0)}
+function setChip(v){chip=v;renderContentOnly()}
+function setPeriod(v){reportPeriod=v;renderContentOnly()}
 function fmtDate(d){return d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—'}
 function total(arr,key){return arr.reduce((s,x)=>s+(Number(x[key])||0),0)}
 function pageHead(title,sub,button,action){
 return `<div class="panel-head"><div><h3>${title}</h3><div class="muted" style="font-size:12px;margin-top:5px">${sub}</div></div>${button?`<button class="btn primary" onclick="${action}">＋ ${button}</button>`:''}</div>`;
 }
-function stat(label,value,icon,foot=''){
-return `<div class="stat"><span class="stat-icon">${icon}</span><div class="label">${label}</div><strong>${value}</strong><small>${foot}</small></div>`;
+function stat(label,value,icon,foot='',tone='',link=''){
+return `<div class="stat ${tone}" ${link?`onclick="go('${link}')" style="cursor:pointer"`:''}><span class="stat-icon">${icon}</span><div class="label">${label}</div><strong>${value}</strong><small>${foot}</small></div>`;
 }
 function filtered(arr,keys){
 return arr.filter(x=>!searchText||keys.some(k=>String(x[k]??'').toLowerCase().includes(searchText.toLowerCase())));
@@ -464,6 +559,14 @@ return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th
 function acts(type,x){
 return `<div class="actions"><button class="btn small" onclick="openModal('${type}','${x.id}')">Editar</button><button class="btn small danger" onclick="del('${type}','${x.id}')">Excluir</button></div>`;
 }
+function statusPill(s){
+const t=String(s||'');
+let c='blue';
+if(['Concluída','Concluído','Entregue','Confirmado'].includes(t))c='green';
+else if(['Cancelada','Cancelado'].includes(t))c='red';
+else if(['Em andamento','Aguardando aprovação'].includes(t))c='orange';
+return `<span class="pill ${c}">${esc(t||'—')}</span>`;
+}
 function serviceParts(s){return Number(s.partsPrice??s.materialPrice??0)}
 function serviceLabor(s){return Number(s.laborPrice??s.price??0)}
 function serviceTotal(s){return serviceParts(s)+serviceLabor(s)}
@@ -477,45 +580,207 @@ function render(){
 renderNav();
 let names=Object.fromEntries(navItems.map(x=>[x[0],x[2]]));
 $('#pageTitle').textContent=names[current];
-$('#pageSubtitle').textContent='Controle sua oficina em um só lugar';
+let sub=subtitles[current]||'';
+if(current==='dashboard'){
+const h=new Date().getHours();
+sub=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+'! '+sub;
+}
+$('#pageSubtitle').textContent=sub;
 renderContentOnly();
 }
-let cfg={};
 
-function renderContentOnly(){
-let c=$('#content');
+/* ---------- auxiliares de relatório ---------- */
+function groupSum(arr,keyFn,valFn){
+const m={};
+arr.forEach(x=>{const k=keyFn(x);m[k]=(m[k]||0)+valFn(x)});
+return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+function bars(entries,tone='',fmt=money,limit=8){
+if(!entries.length)return `<div class="list-empty">Sem dados no período.</div>`;
+const list=entries.slice(0,limit),max=Math.max(...list.map(e=>e[1]),1);
+return list.map(([name,v])=>`
+<div class="bar-row"><span class="name" title="${esc(name)}">${esc(name)}</span>
+<div class="bar-track"><div class="bar-fill ${tone}" style="width:${Math.max(3,Math.round(v/max*100))}%"></div></div>
+<span class="val">${fmt(v)}</span></div>`).join('');
+}
+function payGroup(p){
+if(p==='Pix')return 'Pix';
+if(p==='Débito'||p==='Crédito')return 'Cartão';
+if(p==='Dinheiro')return 'Dinheiro';
+return 'Outros';
+}
+function inPeriod(d){
+if(reportPeriod==='all')return true;
+if(!d)return false;
+const t=today();
+if(reportPeriod==='month')return d.slice(0,7)===t.slice(0,7);
+if(reportPeriod==='year')return d.slice(0,4)===t.slice(0,4);
+if(reportPeriod==='30'){
+const lim=new Date(t+'T12:00:00');lim.setDate(lim.getDate()-30);
+return d>=lim.toISOString().slice(0,10);
+}
+return true;
+}
+function lastMonths(n){
+const out=[],now=new Date(today()+'T12:00:00');
+for(let i=n-1;i>=0;i--){
+const x=new Date(now.getFullYear(),now.getMonth()-i,1,12);
+out.push(x.toISOString().slice(0,7));
+}
+return out;
+}
 
-if(current==='dashboard'){
-let inc=total(db.transactions.filter(x=>x.type==='Receita'),'amount');
-let out=total(db.transactions.filter(x=>x.type==='Despesa'),'amount');
-let low=db.products.filter(p=>Number(p.qty)<=Number(p.min||0)).length;
+/* ---------- visão geral ---------- */
+function renderDashboard(c){
+const act=db.sales.filter(s=>s.status!=='Cancelada');
+const inc=total(db.transactions.filter(x=>x.type==='Receita'),'amount');
+const out=total(db.transactions.filter(x=>x.type==='Despesa'),'amount');
+const lowList=db.products.filter(p=>Number(p.qty)<=Number(p.min||0));
+const openOrders=db.orders.filter(x=>!['Concluída','Entregue','Cancelada'].includes(x.status));
+const stockValue=db.products.reduce((a,p)=>a+(Number(p.qty)||0)*(Number(p.cost)||0),0);
+const sold=act.reduce((a,s)=>a+Number(s.total||0),0);
+const balance=inc-out;
+const lastSales=act.slice(-5).reverse();
+const empty=t=>`<div class="list-empty">${t}</div>`;
 
 c.innerHTML=`
 <div class="cards">
-${stat('Clientes cadastrados',db.clients.length,'♙','Total de clientes')}
-${stat('Produtos no estoque',db.products.length,'▣','Produtos cadastrados')}
-${stat('Ordens em aberto',db.orders.filter(x=>!['Concluída','Entregue','Cancelada'].includes(x.status)).length,'🔧','Serviços pendentes')}
-${stat('Saldo financeiro',money(inc-out),'＄','Receitas menos despesas')}
+${stat('Clientes cadastrados',db.clients.length,'👥','Total de clientes','blue','clients')}
+${stat('Produtos no estoque',db.products.length,'📦','Produtos cadastrados','','products')}
+${stat('Ordens em aberto',openOrders.length,'🔧','Serviços pendentes','','orders')}
+${stat('Saldo financeiro',money(balance),'💰','Receitas menos despesas',balance>=0?'green':'red','transactions')}
 </div>
 <div class="cards">
-${stat('Produtos com estoque baixo',low,'⚠️','Atenção ao estoque')}
-${stat('Vendas registradas',db.sales.filter(s=>s.status!=='Cancelada').length,'↗','Vendas concluídas')}
-${stat('Mão de obra cadastrada',money(total(db.services,'laborPrice')),'🔧','Valor cadastrado')}
-${stat('Peças em vendas',money(db.sales.filter(s=>s.status!=='Cancelada').reduce((a,s)=>a+Number(s.total||0),0)),'＄','Total vendido')}
+${stat('Estoque baixo',lowList.length,'⚠️','Produtos que precisam de reposição',lowList.length?'red':'green','products')}
+${stat('Vendas registradas',act.length,'🛒','Vendas concluídas','blue','sales')}
+${stat('Valor em estoque',money(stockValue),'📦','Calculado pelo preço de custo','','products')}
+${stat('Total vendido',money(sold),'💵','Soma das vendas concluídas','green','sales')}
 </div>
+
+<div class="grid3">
+<div class="panel">
+<div class="panel-head"><h3>⚠️ Atenção ao estoque</h3><button class="btn small" onclick="go('products')">Ver estoque</button></div>
+${lowList.length?lowList.slice(0,6).map(p=>`
+<div class="list-row"><span><b>${esc(p.name)}</b><br><small class="muted">${esc(p.category||'Sem categoria')}</small></span><span class="pill red">${Number(p.qty)||0} un.</span></div>`).join('')+(lowList.length>6?`<div class="list-empty">+ ${lowList.length-6} outros produtos</div>`:''):empty('Tudo certo, nenhum produto com estoque baixo.')}
+</div>
+<div class="panel">
+<div class="panel-head"><h3>🔧 Ordens em aberto</h3><button class="btn small" onclick="go('orders')">Ver todas</button></div>
+${openOrders.length?openOrders.slice(-5).reverse().map(o=>`
+<div class="list-row"><span><b>${esc(o.plate)}</b> · ${esc(o.client)}<br><small class="muted">${esc(o.service)}</small></span>${statusPill(o.status)}</div>`).join(''):empty('Nenhuma ordem de serviço em aberto.')}
+</div>
+<div class="panel">
+<div class="panel-head"><h3>🛒 Últimas vendas</h3><button class="btn small" onclick="go('sales')">Ver todas</button></div>
+${lastSales.length?lastSales.map(s=>`
+<div class="list-row"><span><b>${esc(saleProductName(s))}</b><br><small class="muted">${fmtDate(s.date)} · ${esc(s.payment||'—')}</small></span><b>${money(s.total)}</b></div>`).join(''):empty('Nenhuma venda registrada ainda.')}
+</div>
+</div>
+
 <div class="panel">
 ${pageHead('Acesso rápido','Escolha uma área para continuar')}
 <div class="category-grid">
 ${navItems.slice(1).map(([k,ic,n])=>`
-<button class="btn" style="text-align:left;padding:19px" onclick="go('${k}')">
-<span style="font-size:23px">${ic}</span><br>
+<button class="btn" style="text-align:left;padding:17px" onclick="go('${k}')">
+<span style="font-size:22px">${ic}</span><br>
 <b>${n}</b>
 <div class="muted" style="font-size:11px;margin-top:6px">Abrir módulo →</div>
 </button>`).join('')}
 </div>
 </div>`;
-return;
 }
+
+/* ---------- relatórios ---------- */
+function renderReports(c){
+const tr=db.transactions.filter(x=>inPeriod(x.date));
+const rec=tr.filter(x=>x.type==='Receita'),des=tr.filter(x=>x.type==='Despesa');
+const sales=db.sales.filter(s=>s.status!=='Cancelada'&&inPeriod(s.date));
+const ords=db.orders.filter(o=>inPeriod(o.date));
+const done=ords.filter(o=>['Concluída','Entregue'].includes(o.status));
+const totRec=total(rec,'amount'),totDes=total(des,'amount'),totSales=total(sales,'total');
+const result=totRec-totDes;
+const ticket=sales.length?totSales/sales.length:0;
+
+const months=lastMonths(6);
+const monthData=months.map(m=>({
+m,
+r:total(db.transactions.filter(x=>x.type==='Receita'&&(x.date||'').slice(0,7)===m),'amount'),
+d:total(db.transactions.filter(x=>x.type==='Despesa'&&(x.date||'').slice(0,7)===m),'amount')
+}));
+const maxM=Math.max(1,...monthData.flatMap(x=>[x.r,x.d]));
+const h=v=>Math.round(v/maxM*150);
+const monthLabel=m=>new Date(m+'-15T12:00:00').toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
+
+const periodSel=`<select class="search" style="max-width:240px" onchange="setPeriod(this.value)">
+<option value="all" ${reportPeriod==='all'?'selected':''}>Todo o período</option>
+<option value="month" ${reportPeriod==='month'?'selected':''}>Este mês</option>
+<option value="30" ${reportPeriod==='30'?'selected':''}>Últimos 30 dias</option>
+<option value="year" ${reportPeriod==='year'?'selected':''}>Este ano</option>
+</select>`;
+
+c.innerHTML=`
+<div class="toolbar" style="margin-top:0"><span class="muted" style="font-size:12px">Período:</span>${periodSel}</div>
+<div class="cards">
+${stat('Receitas',money(totRec),'📈',rec.length+' lançamento(s)','green')}
+${stat('Despesas',money(totDes),'📉',des.length+' lançamento(s)','red')}
+${stat('Resultado',money(result),'💰','Receitas menos despesas',result>=0?'green':'red')}
+${stat('Total vendido',money(totSales),'🛒',sales.length+' venda(s) de balcão','blue')}
+</div>
+<div class="cards">
+${stat('Ticket médio',money(ticket),'🧾','Média por venda')}
+${stat('Ordens de serviço',ords.length,'📋','Abertas no período','blue')}
+${stat('OS concluídas',done.length,'✅','Concluídas ou entregues','green')}
+${stat('Faturamento das OS',money(total(done,'price')),'🔧','Soma das OS concluídas')}
+</div>
+
+<div class="grid2">
+<div class="panel">
+${pageHead('Receitas por forma de pagamento','Lançamentos do financeiro')}
+${bars(groupSum(rec,x=>x.payment||'Não informado',x=>Number(x.amount)||0),'green')}
+</div>
+<div class="panel">
+${pageHead('Vendas por forma de pagamento','Vendas de balcão concluídas')}
+${bars(groupSum(sales,x=>x.payment||'Não informado',x=>Number(x.total)||0),'blue')}
+</div>
+</div>
+
+<div class="panel">
+${pageHead('Receitas x despesas','Últimos 6 meses (lançamentos do financeiro)')}
+<div class="legend"><span><i style="background:#35d6a0"></i>Receitas</span><span><i style="background:#ff7070"></i>Despesas</span></div>
+<div class="vchart">
+${monthData.map(x=>`
+<div class="vcol">
+<div class="vpair">
+<div class="vbar g" style="height:${h(x.r)}px" title="Receitas: ${money(x.r)}"></div>
+<div class="vbar r" style="height:${h(x.d)}px" title="Despesas: ${money(x.d)}"></div>
+</div>
+<div class="vlabel">${monthLabel(x.m)}</div>
+</div>`).join('')}
+</div>
+</div>
+
+<div class="grid2">
+<div class="panel">
+${pageHead('Despesas por categoria','Para onde o dinheiro está indo')}
+${bars(groupSum(des,x=>x.category||'Sem categoria',x=>Number(x.amount)||0),'red')}
+</div>
+<div class="panel">
+${pageHead('Produtos mais vendidos','Por quantidade vendida')}
+${bars(groupSum(sales,s=>saleProductName(s),s=>Number(s.qty)||0),'',n=>n+' un.')}
+</div>
+</div>
+
+<div class="panel">
+${pageHead('Resumo da oficina','Totais gerais cadastrados')}
+<p>Clientes: <b>${db.clients.length}</b> · Produtos: <b>${db.products.length}</b> · Agendamentos: <b>${db.appointments.length}</b> · Serviços cadastrados: <b>${db.services.length}</b></p>
+<button class="btn primary" onclick="exportBackup()">Baixar backup dos dados</button>
+</div>`;
+}
+
+let cfg={};
+
+function renderContentOnly(){
+let c=$('#content');
+
+if(current==='dashboard'){renderDashboard(c);return}
 
 if(current==='services'){
 let rows=db.services;
@@ -544,11 +809,23 @@ return;
 
 cfg={
 products:{
-title:'Estoque',sub:'Produtos, quantidades e alerta de estoque mínimo',
-fields:[['name','Nome do produto','text',1],['code','Código / referência','text'],['category','Categoria','text'],['qty','Quantidade','number',1],['min','Estoque mínimo','number'],['cost','Preço de custo (R$)','number'],['price','Preço de venda (R$)','number']],
+title:'Estoque',sub:'Produtos, categorias, quantidades e alerta de estoque mínimo',
+fields:[['name','Nome do produto','text',1],['code','Código / referência','text'],['category','Categoria','select',0,['',...productCategories]],['qty','Quantidade','number',1],['min','Estoque mínimo','number'],['cost','Preço de custo (R$)','number'],['price','Preço de venda (R$)','number']],
 heads:['Produto','Código','Categoria','Qtd.','Custo','Venda','Situação','Ações'],
 keys:['name','code','category'],
-row:x=>`<td><b>${esc(x.name)}</b></td><td>${esc(x.code||'—')}</td><td>${esc(x.category||'—')}</td><td>${Number(x.qty)||0}</td><td>${money(x.cost)}</td><td>${money(x.price)}</td><td>${Number(x.qty)<=Number(x.min||0)?'<span class="pill red">Estoque baixo</span>':'<span class="pill green">Disponível</span>'}</td><td>${acts('products',x)}</td>`
+chip:x=>x.category||'Sem categoria',
+extra:()=>{
+const p=db.products,low=p.filter(x=>Number(x.qty)<=Number(x.min||0)).length;
+const cost=p.reduce((a,x)=>a+(Number(x.qty)||0)*(Number(x.cost)||0),0);
+const sale=p.reduce((a,x)=>a+(Number(x.qty)||0)*(Number(x.price)||0),0);
+return `<div class="cards">
+${stat('Itens cadastrados',p.length,'📦','Produtos diferentes','blue')}
+${stat('Unidades em estoque',total(p,'qty'),'🧮','Soma de todas as quantidades')}
+${stat('Valor em estoque',money(cost),'💰','Preço de custo · venda: '+money(sale),'green')}
+${stat('Estoque baixo',low,'⚠️','Precisam de reposição',low?'red':'green')}
+</div>`;
+},
+row:x=>`<td><b>${esc(x.name)}</b></td><td>${esc(x.code||'—')}</td><td>${x.category?`<span class="pill blue">${esc(x.category)}</span>`:'—'}</td><td>${Number(x.qty)||0}</td><td>${money(x.cost)}</td><td>${money(x.price)}</td><td>${Number(x.qty)<=Number(x.min||0)?'<span class="pill red">Estoque baixo</span>':'<span class="pill green">Disponível</span>'}</td><td>${acts('products',x)}</td>`
 },
 clients:{
 title:'Clientes',sub:'Cadastro e contato',
@@ -562,55 +839,92 @@ title:'Ordens de serviço',sub:'Acompanhe serviços, veículos, peças e mão de
 fields:[['date','Data de abertura','date',1],['client','Nome do cliente','text',1],['phone','Telefone','tel'],['plate','Placa','text',1],['vehicleModel','Modelo do veículo','text',1],['serviceId','Serviço cadastrado','serviceSelect'],['service','Descrição do serviço','text',1],['partsPrice','Peças e materiais (R$)','number'],['laborPrice','Mão de obra (R$)','number'],['price','Valor total (R$)','number',1],['description','Descrição / observações','textarea'],['status','Status','select',1,['Aberta','Aguardando aprovação','Em andamento','Concluída','Entregue','Cancelada']]],
 heads:['OS','Data','Cliente','Placa','Veículo','Serviço','Peças','Mão de obra','Total','Status','Ações'],
 keys:['client','plate','vehicleModel','service','status'],
-row:x=>`<td>#${esc(String(x.id).slice(-6))}</td><td>${fmtDate(x.date)}</td><td>${esc(x.client)}</td><td><b>${esc(x.plate)}</b></td><td>${esc(x.vehicleModel)}</td><td>${esc(x.service)}</td><td>${money(x.partsPrice)}</td><td>${money(x.laborPrice??x.price)}</td><td><b>${money(x.price)}</b></td><td><span class="pill orange">${esc(x.status)}</span></td><td>${acts('orders',x)}</td>`
+chip:x=>x.status||'Sem status',
+extra:()=>{
+const o=db.orders,openO=o.filter(x=>!['Concluída','Entregue','Cancelada'].includes(x.status));
+const done=o.filter(x=>['Concluída','Entregue'].includes(x.status));
+return `<div class="cards">
+${stat('Em aberto',openO.length,'🔧','Serviços pendentes','')}
+${stat('Concluídas',done.length,'✅','Concluídas ou entregues','green')}
+${stat('A receber (abertas)',money(total(openO,'price')),'⏳','Valor das OS em aberto','blue')}
+${stat('Faturado (concluídas)',money(total(done,'price')),'💰','Valor das OS concluídas','green')}
+</div>`;
+},
+row:x=>`<td>#${esc(String(x.id).slice(-6))}</td><td>${fmtDate(x.date)}</td><td>${esc(x.client)}</td><td><b>${esc(x.plate)}</b></td><td>${esc(x.vehicleModel)}</td><td>${esc(x.service)}</td><td>${money(x.partsPrice)}</td><td>${money(x.laborPrice??x.price)}</td><td><b>${money(x.price)}</b></td><td>${statusPill(x.status)}</td><td>${acts('orders',x)}</td>`
 },
 appointments:{
 title:'Agendamentos',sub:'Organize os próximos atendimentos',
 fields:[['client','Cliente','text',1],['phone','Telefone','tel'],['plate','Placa','text',1],['vehicleModel','Modelo do veículo','text',1],['service','Serviço solicitado','text',1],['date','Data','date',1],['time','Horário','time',1],['status','Status','select',1,['Agendado','Confirmado','Em andamento','Concluído','Cancelado']],['notes','Observações','textarea']],
 heads:['Data','Horário','Cliente','Placa','Veículo','Serviço','Status','Ações'],
 keys:['client','plate','vehicleModel','service','status'],
-row:x=>`<td>${fmtDate(x.date)}</td><td>${esc(x.time)}</td><td>${esc(x.client)}</td><td>${esc(x.plate)}</td><td>${esc(x.vehicleModel)}</td><td>${esc(x.service)}</td><td>${esc(x.status)}</td><td>${acts('appointments',x)}</td>`
+chip:x=>x.status||'Sem status',
+row:x=>`<td>${fmtDate(x.date)}</td><td>${esc(x.time)}</td><td>${esc(x.client)}</td><td>${esc(x.plate)}</td><td>${esc(x.vehicleModel)}</td><td>${esc(x.service)}</td><td>${statusPill(x.status)}</td><td>${acts('appointments',x)}</td>`
 },
 sales:{
 title:'Vendas',sub:'Selecione um produto do estoque. A quantidade será baixada automaticamente.',
 fields:[['date','Data','date',1],['client','Cliente ou balcão','text'],['productId','Produto do estoque','productSelect',1],['qty','Quantidade','number',1],['unitPrice','Preço unitário (R$)','number',1],['payment','Pagamento','select',1,['Dinheiro','Pix','Débito','Crédito','Transferência','A prazo']],['status','Situação','select',1,['Concluída','Cancelada']]],
 heads:['Data','Cliente','Produto','Qtd.','Total','Pagamento','Situação','Ações'],
 keys:['client','product','payment','status'],
-row:x=>`<td>${fmtDate(x.date)}</td><td>${esc(x.client||'Balcão')}</td><td>${esc(saleProductName(x))}</td><td>${x.qty}</td><td>${money(x.total)}</td><td>${esc(x.payment)}</td><td>${x.status==='Cancelada'?'<span class="pill red">Cancelada</span>':'<span class="pill green">Concluída</span>'}</td><td>${acts('sales',x)}</td>`
+chip:x=>x.payment||'Sem pagamento',
+extra:()=>{
+const ok=db.sales.filter(s=>s.status!=='Cancelada'),t=total(ok,'total');
+return `<div class="cards">
+${stat('Total vendido',money(t),'💵','Vendas concluídas','green')}
+${stat('Vendas concluídas',ok.length,'🛒','Registradas','blue')}
+${stat('Ticket médio',money(ok.length?t/ok.length:0),'🧾','Média por venda')}
+${stat('Canceladas',db.sales.length-ok.length,'🚫','Vendas canceladas',db.sales.length-ok.length?'red':'')}
+</div>`;
+},
+row:x=>`<td>${fmtDate(x.date)}</td><td>${esc(x.client||'Balcão')}</td><td>${esc(saleProductName(x))}</td><td>${x.qty}</td><td>${money(x.total)}</td><td><span class="pill">${esc(x.payment)}</span></td><td>${x.status==='Cancelada'?'<span class="pill red">Cancelada</span>':'<span class="pill green">Concluída</span>'}</td><td>${acts('sales',x)}</td>`
 },
 transactions:{
 title:'Financeiro',sub:'Entradas e saídas do caixa',
-fields:[['date','Data','date',1],['type','Tipo','select',1,['Receita','Despesa']],['description','Descrição','text',1],['category','Categoria','text'],['amount','Valor (R$)','number',1],['payment','Pagamento','select',0,['Dinheiro','Pix','Débito','Crédito','Transferência','Boleto','Outro']]],
+fields:[['date','Data','date',1],['type','Tipo','select',1,['Receita','Despesa']],['description','Descrição','text',1],['category','Categoria','datalist',0,financeCategories],['amount','Valor (R$)','number',1],['payment','Pagamento','select',0,['Dinheiro','Pix','Débito','Crédito','Transferência','Boleto','Outro']]],
 heads:['Data','Tipo','Descrição','Categoria','Pagamento','Valor','Ações'],
-keys:['type','description','category'],
-row:x=>`<td>${fmtDate(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.description)}</td><td>${esc(x.category||'—')}</td><td>${esc(x.payment||'—')}</td><td>${money(x.amount)}</td><td>${acts('transactions',x)}</td>`
+keys:['type','description','category','payment'],
+chip:x=>x.type||'Sem tipo',
+extra:()=>{
+const rec=db.transactions.filter(x=>x.type==='Receita'),des=db.transactions.filter(x=>x.type==='Despesa');
+const inc=total(rec,'amount'),out=total(des,'amount'),bal=inc-out;
+const g={Pix:0,Cartão:0,Dinheiro:0,Outros:0};
+rec.forEach(x=>{g[payGroup(x.payment)]+=Number(x.amount)||0});
+const pct=v=>inc?Math.round(v/inc*100)+'% das receitas':'Sem receitas ainda';
+return `<div class="cards">
+${stat('Receitas',money(inc),'📈',rec.length+' lançamento(s)','green')}
+${stat('Despesas',money(out),'📉',des.length+' lançamento(s)','red')}
+${stat('Saldo',money(bal),'💰','Receitas menos despesas',bal>=0?'green':'red')}
+${stat('Lançamentos',db.transactions.length,'🧾','Total registrado','blue')}
+</div>
+<div class="cards">
+${stat('Recebido em Pix',money(g.Pix),'⚡',pct(g.Pix),'blue')}
+${stat('Recebido em cartão',money(g.Cartão),'💳',pct(g.Cartão)+' · débito + crédito','')}
+${stat('Recebido em dinheiro',money(g.Dinheiro),'💵',pct(g.Dinheiro),'green')}
+${stat('Outras formas',money(g.Outros),'🏦',pct(g.Outros)+' · transferência, boleto...','blue')}
+</div>`;
+},
+row:x=>`<td>${fmtDate(x.date)}</td><td>${x.type==='Receita'?'<span class="pill green">Receita</span>':'<span class="pill red">Despesa</span>'}</td><td>${esc(x.description)}</td><td>${esc(x.category||'—')}</td><td>${x.payment?`<span class="pill">${esc(x.payment)}</span>`:'—'}</td><td class="${x.type==='Receita'?'in':'out'}">${x.type==='Receita'?'+':'−'} ${money(x.amount)}</td><td>${acts('transactions',x)}</td>`
 }
 };
 
-if(current==='reports'){
-c.innerHTML=`
-<div class="cards">
-${stat('Vendas registradas',money(db.sales.filter(s=>s.status!=='Cancelada').reduce((a,s)=>a+Number(s.total||0),0)),'↗',db.sales.filter(s=>s.status!=='Cancelada').length+' venda(s)')}
-${stat('Receitas',money(total(db.transactions.filter(x=>x.type==='Receita'),'amount')),'＋')}
-${stat('Despesas',money(total(db.transactions.filter(x=>x.type==='Despesa'),'amount')),'－')}
-${stat('Ordens de serviço',db.orders.length,'🔧')}
-</div>
-<div class="panel">
-${pageHead('Resumo da oficina','Indicadores calculados com os registros atuais')}
-<p>Clientes: <b>${db.clients.length}</b></p>
-<p>Produtos: <b>${db.products.length}</b></p>
-<p>Agendamentos: <b>${db.appointments.length}</b></p>
-<p>Serviços cadastrados: <b>${db.services.length}</b></p>
-<button class="btn primary" onclick="exportBackup()">Baixar backup dos dados</button>
-</div>`;
-return;
-}
+if(current==='reports'){renderReports(c);return}
 
 let conf=cfg[current];
-let arr=filtered(db[current],conf.keys);
+let all=db[current];
+
+// filtros por categoria / status / tipo
+let chipsHtml='';
+if(conf.chip){
+const counts={};
+all.forEach(x=>{const k=conf.chip(x);counts[k]=(counts[k]||0)+1});
+if(chip!=='all'&&!counts[chip])chip='all';
+const keys=Object.keys(counts).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+chipsHtml=`<div class="chips"><button class="chip ${chip==='all'?'active':''}" onclick="setChip('all')">Todos<span>${all.length}</span></button>${keys.map(k=>`<button class="chip ${chip===k?'active':''}" data-v="${esc(k)}" onclick="setChip(this.dataset.v)">${esc(k)}<span>${counts[k]}</span></button>`).join('')}</div>`;
+}
+
+let arr=filtered(all,conf.keys);
+if(conf.chip&&chip!=='all')arr=arr.filter(x=>conf.chip(x)===chip);
 let rows=arr.slice().reverse().map(x=>`<tr>${conf.row(x)}</tr>`).join('');
-let extra=current==='transactions'?`<div class="cards">${stat('Receitas',money(total(db.transactions.filter(x=>x.type==='Receita'),'amount')),'↗')}${stat('Despesas',money(total(db.transactions.filter(x=>x.type==='Despesa'),'amount')),'↘')}</div>`:'';
-c.innerHTML=extra+pageHead(conf.title,conf.sub,'Novo registro',`openModal('${current}')`)+toolbar()+table(conf.heads,rows);
+c.innerHTML=(conf.extra?conf.extra():'')+pageHead(conf.title,conf.sub,'Novo registro',`openModal('${current}')`)+toolbar()+chipsHtml+table(conf.heads,rows);
 }
 
 function saleProductName(s){
@@ -625,7 +939,13 @@ function makeField([k,label,kind,req,opts],old,type){
 let val=old[k]??(k==='date'?today():k==='qty'?1:k==='status'?(type==='orders'?'Aberta':type==='sales'?'Concluída':'Agendado'):k==='partsPrice'?0:k==='laborPrice'?0:'');
 let required=req===1?'required':'';
 if(kind==='textarea')return `<div class="field full"><label>${label}${req===1?' *':''}</label><textarea name="${k}" rows="3">${esc(val)}</textarea></div>`;
-if(kind==='select')return `<div class="field"><label>${label}${req===1?' *':''}</label><select name="${k}" ${required}>${(opts||[]).map(o=>`<option value="${esc(o)}" ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
+if(kind==='select'){
+let list=opts||[];
+// mantém valores antigos (ex.: categoria digitada à mão) que não estão na lista
+if(val&&!list.includes(val))list=[val,...list];
+return `<div class="field"><label>${label}${req===1?' *':''}</label><select name="${k}" ${required}>${list.map(o=>`<option value="${esc(o)}" ${o===val?'selected':''}>${esc(o||'— Sem categoria —')}</option>`).join('')}</select></div>`;
+}
+if(kind==='datalist')return `<div class="field"><label>${label}${req===1?' *':''}</label><input name="${k}" type="text" list="dl_${k}" value="${esc(val)}" ${required} placeholder="Escolha ou digite"><datalist id="dl_${k}">${(opts||[]).map(o=>`<option value="${esc(o)}">`).join('')}</datalist></div>`;
 if(kind==='serviceSelect')return `<div class="field"><label>${label}</label><select name="serviceId" id="serviceSelect">${serviceOptions(val)}</select></div>`;
 if(kind==='productSelect')return `<div class="field full"><label>${label} *</label><select name="productId" id="productSelect" required>${productOptions(val)}</select></div>`;
 return `<div class="field"><label>${label}${req===1?' *':''}</label><input name="${k}" type="${kind}" value="${esc(val)}" ${required} ${kind==='number'?'min="0" step="0.01"':''}></div>`;
@@ -811,6 +1131,7 @@ async function activate(u){
 user=u;
 $('#loginScreen').classList.add('hidden');
 $('#app').classList.remove('hidden');
+$('#userMail').textContent=u.email||'';
 try{
 let {data,error}=await sb.from('auto_center_data').select('data').eq('user_id',u.id).maybeSingle();
 if(error)throw error;
